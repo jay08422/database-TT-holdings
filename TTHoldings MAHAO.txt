@@ -1,0 +1,827 @@
+mysql> CREATE DATABASE TTHolding;
+Query OK, 1 row affected (0.21 sec)
+
+mysql> USE TTHolding;
+Database changed
+mysql> CREATE TABLE Person (
+    ->     PersonID INT PRIMARY KEY AUTO_INCREMENT,
+    ->     Name VARCHAR(100) NOT NULL,
+    ->     Address VARCHAR(200),
+    ->     Phone VARCHAR(20),
+    ->     BirthDate DATE
+    -> );
+Query OK, 0 rows affected (1.86 sec)
+
+mysql> CREATE TABLE Organization (
+    ->     OrgID INT PRIMARY KEY AUTO_INCREMENT,
+    ->     Name VARCHAR(100) NOT NULL,
+    ->     Address VARCHAR(200),
+    ->     Phone VARCHAR(20),
+    ->     BudgetNumber VARCHAR(50),
+    ->     Type ENUM('Internal', 'External') NOT NULL
+    -> );
+Query OK, 0 rows affected (0.35 sec)
+
+mysql> CREATE TABLE Employment (
+    ->     EmploymentID INT PRIMARY KEY AUTO_INCREMENT,
+    ->     PersonID INT NOT NULL,
+    ->     OrgID INT NOT NULL,
+    ->     EmploymentDate DATE NOT NULL,
+    ->     TerminationDate DATE,
+    ->     Bonus DECIMAL(10,2),
+    ->     FOREIGN KEY (PersonID) REFERENCES Person(PersonID),
+    ->     FOREIGN KEY (OrgID) REFERENCES Organization(OrgID)
+    -> );
+Query OK, 0 rows affected (0.99 sec)
+
+mysql> CREATE TABLE Position (
+    ->     PositionID INT PRIMARY KEY AUTO_INCREMENT,
+    ->     Title VARCHAR(100) NOT NULL,
+    ->     ResponsibleOrgID INT NOT NULL,
+    ->     Salary DECIMAL(10,2) NOT NULL,
+    ->     FOREIGN KEY (ResponsibleOrgID) REFERENCES Organization(OrgID)
+    -> );
+Query OK, 0 rows affected (0.74 sec)
+
+mysql> CREATE TABLE JobPosition (
+    ->  PositionID INT PRIMARY KEY AUTO_INCREMENT,
+    ->     Title VARCHAR(100),
+    ->     ResponsibleOrgID INT,
+    ->     Salary DECIMAL(10,2),
+    ->     FOREIGN KEY (ResponsibleOrgID) REFERENCES Organization(OrgID)
+    -> );
+Query OK, 0 rows affected (0.52 sec)
+
+mysql> CREATE TABLE PersonPosition (
+    ->     PersonID INT,
+    ->     PositionID INT,
+    ->     StartDate DATE,
+    ->     TerminationDate DATE,
+    ->     PRIMARY KEY (PersonID, PositionID, StartDate),
+    ->     FOREIGN KEY (PersonID) REFERENCES Person(PersonID),
+    ->     FOREIGN KEY (PositionID) REFERENCES JobPosition(PositionID)
+    -> );
+Query OK, 0 rows affected (0.54 sec)
+
+mysql> CREATE TABLE PermanentEmployee (
+    ->     PersonID INT PRIMARY KEY,
+    ->     Bonus DECIMAL(10,2),
+    ->     Credit DECIMAL(10,2),
+    ->     FOREIGN KEY (PersonID) REFERENCES Person(PersonID)
+    -> );
+Query OK, 0 rows affected (0.48 sec)
+
+mysql> CREATE TABLE PartTimeEmployee (
+    ->     PersonID INT PRIMARY KEY,
+    ->     ExtraHours INT,
+    ->     FOREIGN KEY (PersonID) REFERENCES Person(PersonID)
+    -> );
+Query OK, 0 rows affected (0.38 sec)
+
+mysql> INSERT INTO Person (Name, Address, Phone, BirthDate) VALUES
+    -> ('Thabo Mokoena', '123 Hillsview, Maseru', '266-5874-1234', '1980-05-15'),
+    -> ('Matseliso Phiri', '456 Thetsane, Maseru', '266-5874-5678', '1985-08-22'),
+    -> ('Tumisang Letsie', '789 Ha Abia, Maseru', '266-5874-9012', '1975-11-30'),
+    -> ('Lineo Mokhele', '321 Lower Thamae, Maseru', '266-5874-3456', '1990-03-10'),
+    -> ('Motlatsi Ntšonyana', '654 Ha Leqele, Maseru', '266-5874-7890', '1982-07-18'),
+    -> ('Malebohang Mohapi', '987 Pitseng, Leribe', '266-5874-2345', '1988-09-25'),
+    -> ('Lehlohonolo Mphanya', '135 Ha Matala, Maseru', '266-5874-6789', '1978-12-05'),
+    -> ('Mamello Thabane', '246 Ha Thetsane, Maseru', '266-5874-0123', '1992-04-12'),
+    -> ('Tšepo Majara', '864 Ha Foso, Mafeteng', '266-5874-4567', '1983-06-20'),
+    -> ('Palesa Sekhonyana', '975 Ha Makhoathi, Maseru', '266-5874-8901', '1987-01-28');
+Query OK, 10 rows affected (0.18 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Organization (Name, Address, Phone, BudgetNumber, Type) VALUES
+    -> ('TT Holdings HQ', '1 Kingsway, Maseru Central', '266-2231-2345', 'BGT1001', 'Internal'),
+    -> ('Finance Division', '1 Kingsway, Maseru Central', '266-2231-2346', 'BGT1002', 'Internal'),
+    -> ('HR Department', '1 Kingsway, Maseru Central', '266-2231-2347', 'BGT1003', 'Internal'),
+    -> ('Mafeteng Tech Solutions', '25 Main Rd, Mafeteng', '266-2270-1234', 'BGT2001', 'External'),
+    -> ('Leribe Business Partners', '12 Hlotse Rd, Leribe', '266-2240-5678', 'BGT3001', 'External'),
+    -> ('Quality Assurance', '1 Kingsway, Maseru Central', '266-2231-2348', 'BGT1004', 'Internal'),
+    -> ('Marketing Team', '1 Kingsway, Maseru Central', '266-2231-2349', 'BGT1005', 'Internal'),
+    -> ('Mokhotlong Data Systems', '8 Mountain View, Mokhotlong', '266-2291-3456', 'BGT4001', 'External'),
+    -> ('Customer Support', '1 Kingsway, Maseru Central', '266-2231-2350', 'BGT1006', 'Internal'),
+    -> ('Quthing Logistics', '3 Valley Rd, Quthing', '266-2275-7890', 'BGT5001', 'External');
+Query OK, 10 rows affected (0.10 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Employment (PersonID, OrgID, EmploymentDate, TerminationDate, Bonus) VALUES
+    -> (1, 1, '2010-06-15', NULL, 5000.00),
+    -> (2, 2, '2015-03-22', NULL, 3000.00),
+    -> (3, 3, '2012-11-10', '2020-05-30', 2000.00),
+    -> (4, 4, '2018-07-05', NULL, 4000.00),
+    -> (5, 5, '2016-09-18', NULL, 3500.00),
+    -> (6, 1, '2019-04-12', NULL, 2500.00),
+    -> (7, 2, '2017-08-30', NULL, 2800.00),
+    -> (8, 3, '2020-01-15', NULL, 1500.00),
+    -> (9, 4, '2014-05-20', '2021-10-31', 3200.00),
+    -> (10, 5, '2018-02-28', NULL, 1800.00);
+Query OK, 10 rows affected (0.10 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO JobPosition (Title, ResponsibleOrgID, Salary) VALUES
+    -> ('CEO', 1, 150000.00),
+    -> ('CFO', 2, 120000.00),
+    -> ('HR Manager', 3, 90000.00),
+    -> ('Software Developer', 4, 85000.00),
+    -> ('Account Manager', 5, 95000.00),
+    -> ('Marketing Director', 1, 110000.00),
+    -> ('Data Analyst', 2, 80000.00),
+    -> ('Customer Support Lead', 3, 75000.00),
+    -> ('Logistics Coordinator', 4, 70000.00),
+    -> ('QA Specialist', 5, 78000.00);
+Query OK, 10 rows affected (0.11 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO PersonPosition (PersonID, PositionID, StartDate, TerminationDate) VALUES
+    -> (1, 1, '2010-06-15', NULL),
+    -> (2, 2, '2015-03-22', NULL),
+    -> (3, 3, '2012-11-10', '2020-05-30'),
+    -> (4, 4, '2018-07-05', NULL),
+    -> (5, 5, '2016-09-18', NULL),
+    -> (6, 6, '2019-04-12', NULL),
+    -> (7, 7, '2017-08-30', NULL),
+    -> (8, 8, '2020-01-15', NULL),
+    -> (9, 9, '2014-05-20', '2021-10-31'),
+    -> (10, 10, '2018-02-28', NULL);
+Query OK, 10 rows affected (0.07 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO PermanentEmployee (PersonID, Bonus, Credit) VALUES
+    -> (1, 5000.00, 10000.00),
+    -> (2, 3000.00, 8000.00),
+    -> (6, 2500.00, 6000.00),
+    -> (7, 2800.00, 7000.00),
+    -> (8, 1500.00, 4000.00);
+Query OK, 5 rows affected (0.08 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO PartTimeEmployee (PersonID, ExtraHours) VALUES
+    -> (3, 10),
+    -> (4, 15),
+    -> (5, 8),
+    -> (9, 12),
+    -> (10, 5);
+Query OK, 5 rows affected (0.07 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> CREATE VIEW PersonBasicInfo AS
+    -> SELECT PersonID, Name, Phone FROM Person;
+Query OK, 0 rows affected (0.23 sec)
+
+mysql> CREATE VIEW PersonAge AS
+    -> SELECT PersonID, Name, BirthDate, TIMESTAMPDIFF(YEAR, BirthDate, CURDATE()) AS Age FROM Person;
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> CREATE VIEW InternalOrganizations AS
+    -> SELECT * FROM Organization WHERE Type = 'Internal';
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> CREATE VIEW OrganizationContactInfo AS
+    -> SELECT OrgID, Name, Phone FROM Organization;
+Query OK, 0 rows affected (0.21 sec)
+
+mysql> CREATE VIEW CurrentEmployments AS
+    -> SELECT * FROM Employment WHERE TerminationDate IS NULL;
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> CREATE VIEW EmploymentDuration AS
+    -> SELECT e.EmploymentID, p.Name, o.Name AS Organization,
+    ->        e.EmploymentDate, e.TerminationDate,
+    ->        DATEDIFF(IFNULL(e.TerminationDate, CURDATE()), e.EmploymentDate) AS DaysEmployed
+    -> FROM Employment e
+    -> JOIN Person p ON e.PersonID = p.PersonID
+    -> JOIN Organization o ON e.OrgID = o.OrgID;
+Query OK, 0 rows affected (0.22 sec)
+
+mysql> CREATE VIEW HighSalaryJobPositions AS
+    -> SELECT * FROM JobPosition WHERE Salary > 100000;
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> CREATE VIEW JobPositionResponsibility AS
+    -> SELECT p.PositionID, p.Title, o.Name AS ResponsibleOrganization
+    -> FROM JobPosition p
+    -> JOIN Organization o ON p.ResponsibleOrgID = o.OrgID;
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> CREATE VIEW CurrentPositions AS
+    -> SELECT * FROM PersonPosition WHERE TerminationDate IS NULL;
+Query OK, 0 rows affected (0.11 sec)
+
+mysql>
+mysql> CREATE VIEW PositionHistory AS
+    -> SELECT pp.PersonID, p.Name AS PersonName, pos.Title AS PositionTitle,
+    ->        pp.StartDate, pp.TerminationDate
+    -> FROM PersonPosition pp
+    -> JOIN Person p ON pp.PersonID = p.PersonID
+    -> JOIN Position pos ON pp.PositionID = pos.PositionID;
+ERROR 1146 (42S02): Table 'ttholding.position' doesn't exist
+mysql> CREATE VIEW JobPositionHistory AS
+    -> SELECT pp.PersonID, p.Name AS PersonName, pos.Title AS PositionTitle,
+    ->        pp.StartDate, pp.TerminationDate
+    -> FROM PersonPosition pp
+    -> JOIN Person p ON pp.PersonID = p.PersonID
+    -> JOIN JobPosition pos ON pp.PositionID = pos.PositionID;
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> CREATE VIEW PermanentEmployeesWithHighBonus AS
+    -> SELECT pe.PersonID, p.Name, pe.Bonus, pe.Credit
+    -> FROM PermanentEmployee pe
+    -> JOIN Person p ON pe.PersonID = p.PersonID
+    -> WHERE pe.Bonus > 2000;
+Query OK, 0 rows affected (0.26 sec)
+
+mysql>
+mysql> CREATE VIEW PermanentEmployeeBenefits AS
+    -> SELECT pe.PersonID, p.Name, pe.Bonus + pe.Credit AS TotalBenefits
+    -> FROM PermanentEmployee pe
+    -> JOIN Person p ON pe.PersonID = p.PersonID;
+Query OK, 0 rows affected (0.18 sec)
+
+mysql> CREATE VIEW PartTimeEmployeesWithManyHours AS
+    -> SELECT pe.PersonID, p.Name, pe.ExtraHours
+    -> FROM PartTimeEmployee pe
+    -> JOIN Person p ON pe.PersonID = p.PersonID
+    -> WHERE pe.ExtraHours > 10;
+Query OK, 0 rows affected (0.13 sec)
+
+mysql>
+mysql> CREATE VIEW PartTimeEmployeeWorkload AS
+    -> SELECT pe.PersonID, p.Name,
+    ->        CASE
+    ->            WHEN pe.ExtraHours > 15 THEN 'High'
+    ->            WHEN pe.ExtraHours > 10 THEN 'Medium'
+    ->            ELSE 'Low'
+    ->        END AS Workload
+    -> FROM PartTimeEmployee pe
+    -> JOIN Person p ON pe.PersonID = p.PersonID;
+Query OK, 0 rows affected (0.17 sec)
+
+mysql> DELIMITER //
+mysql> CREATE TRIGGER before_person_insert
+    -> BEFORE INSERT ON Person
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     IF NEW.BirthDate > DATE_SUB(CURDATE(), INTERVAL 18 YEAR) THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Person must be at least 18 years old';
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.18 sec)
+
+mysql> DELIMITER ;
+mysql> DELIMITER //
+mysql> CREATE TRIGGER before_employment_insert
+    -> BEFORE INSERT ON Employment
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     IF NEW.EmploymentDate IS NULL THEN
+    ->         SET NEW.EmploymentDate = CURDATE();
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.08 sec)
+mysql> DELIMITER //
+mysql> CREATE TRIGGER before_jobposition_salary_update
+    -> BEFORE UPDATE ON JobPosition
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     IF NEW.Salary < OLD.Salary THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Salary cannot be reduced';
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> DELIMITER ;
+mysql> DELIMITER //
+mysql> CREATE TRIGGER after_employment_update
+    -> AFTER UPDATE ON Employment
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     IF NEW.TerminationDate IS NOT NULL AND OLD.TerminationDate IS NULL THEN
+    ->         UPDATE PersonPosition
+    ->         SET TerminationDate = NEW.TerminationDate
+    ->         WHERE PersonID = NEW.PersonID AND TerminationDate IS NULL;
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> DELIMITER ;
+mysql> CREATE TABLE OrganizationArchive (
+    ->     ArchiveID INT AUTO_INCREMENT PRIMARY KEY,
+    ->     OrgID INT NOT NULL,
+    ->     Name VARCHAR(100),
+    ->     Address VARCHAR(200),
+    ->     Phone VARCHAR(20),
+    ->     BudgetNumber VARCHAR(50),
+    ->     Type ENUM('Internal', 'External'),
+    ->     DeletedDate DATE NOT NULL,
+    ->     OriginalCreationDate DATETIME DEFAULT CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.72 sec)
+
+mysql> DELIMITER //
+mysql> CREATE TRIGGER before_organization_delete
+    -> BEFORE DELETE ON Organization
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     INSERT INTO OrganizationArchive (
+    ->         OrgID, Name, Address, Phone,
+    ->         BudgetNumber, Type, DeletedDate
+    ->     )
+    ->     VALUES (
+    ->         OLD.OrgID, OLD.Name, OLD.Address, OLD.Phone,
+    ->         OLD.BudgetNumber, OLD.Type, CURDATE()
+    ->     );
+    -> END //
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> DELIMITER ;
+mysql> DELIMITER //
+mysql> CREATE TRIGGER before_person_delete
+    -> BEFORE DELETE ON Person
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     DECLARE employment_count INT;
+    ->     SELECT COUNT(*) INTO employment_count FROM Employment
+    ->     WHERE PersonID = OLD.PersonID AND TerminationDate IS NULL;
+    ->
+    ->     IF employment_count > 0 THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Cannot delete person with active employments';
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> DELIMITER ;
+mysql> CREATE FUNCTION CalculateTotalCompensation(person_id INT)
+    -> RETURNS DECIMAL(10,2)
+    -> DETERMINISTIC
+    -> BEGIN
+    ->     DECLARE total DECIMAL(10,2);
+    ->     DECLARE salary_sum DECIMAL(10,2);
+    ->     DECLARE bonus_sum DECIMAL(10,2);
+    ->
+    ->     SELECT IFNULL(SUM(jp.Salary), 0) INTO salary_sum
+    ->     FROM PersonPosition pp
+    ->     JOIN JobPosition jp ON pp.PositionID = jp.PositionID
+    ->     WHERE pp.PersonID = person_id AND pp.TerminationDate IS NULL;
+    ->
+    ->     SELECT IFNULL(SUM(e.Bonus), 0) INTO bonus_sum
+    ->     FROM Employment e
+    ->     WHERE e.PersonID = person_id AND e.TerminationDate IS NULL;
+    ->
+    ->     SET total = salary_sum + bonus_sum;
+    ->     RETURN total;
+    -> END //
+Query OK, 0 rows affected (0.11 sec)
+mysql> DELIMITER ;
+mysql> DELIMITER //
+mysql> CREATE FUNCTION IsPermanentEmployee(person_id INT)
+    -> RETURNS BOOLEAN
+    -> DETERMINISTIC
+    -> BEGIN
+    ->     DECLARE is_permanent BOOLEAN;
+    ->
+    ->     SELECT COUNT(*) > 0 INTO is_permanent
+    ->     FROM PermanentEmployee
+    ->     WHERE PersonID = person_id;
+    ->
+    ->     RETURN is_permanent;
+    -> END //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> DELIMITER ;
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE PromoteEmployee(
+    ->     IN p_person_id INT,
+    ->     IN p_new_position_id INT,
+    ->     IN p_start_date DATE
+    -> )
+    -> BEGIN
+    ->     UPDATE PersonPosition
+    ->     SET TerminationDate = IFNULL(p_start_date, CURDATE())
+    ->     WHERE PersonID = p_person_id AND TerminationDate IS NULL;
+    ->
+    ->     INSERT INTO PersonPosition (PersonID, PositionID, StartDate)
+    ->     VALUES (p_person_id, p_new_position_id, IFNULL(p_start_date, CURDATE()));
+    ->
+    ->     SELECT 'Employee promoted successfully' AS Result;
+    -> END //
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> DELIMITER ;
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE GenerateOrganizationEmploymentReport(
+    ->     IN p_org_id INT
+    -> )
+    -> BEGIN
+    ->     SELECT
+    ->         p.PersonID,
+    ->         p.Name AS EmployeeName,
+    ->         e.EmploymentDate,
+    ->         IFNULL(e.TerminationDate, 'Current') AS TerminationStatus,
+    ->
+    ->         jp.Title AS CurrentPosition,
+    ->         jp.Salary
+    ->     FROM Employment e
+    ->     JOIN Person p ON e.PersonID = p.PersonID
+    ->     LEFT JOIN PersonPosition pp ON pp.PersonID = p.PersonID AND pp.TerminationDate IS NULL
+    ->     LEFT JOIN JobPosition jp ON pp.PositionID = jp.PositionID
+    ->
+    ->      WHERE e.OrgID = p_org_id
+    ->     ORDER BY e.TerminationDate IS NULL DESC, e.EmploymentDate DESC;
+    -> END //
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> DELIMITER ;
+mysql> CREATE USER 'mamello_hr'@'localhost' IDENTIFIED BY 'Maseru@123';
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> CREATE USER 'thabo_finance'@'localhost' IDENTIFIED BY 'Leribe$456';
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> GRANT SELECT, INSERT, UPDATE ON TTHolding.Person TO 'mamello_hr'@'localhost';
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> GRANT SELECT, INSERT, UPDATE ON TTHolding.Employment TO 'mamello_hr'@'localhost';
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> GRANT SELECT ON TTHolding.Organization TO 'mamello_hr'@'localhost';
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> GRANT SELECT ON TTHolding.Person TO 'thabo_finance'@'localhost';
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> GRANT SELECT, UPDATE ON TTHolding.JobPosition TO 'thabo_finance'@'localhost';
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> GRANT SELECT ON TTHolding.Employment TO 'thabo_finance'@'localhost';
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> GRANT EXECUTE ON PROCEDURE TTHolding.GenerateOrganizationEmploymentReport TO 'thabo_finance'@'localhost';
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> SELECT 'Person' AS TableName, COUNT(*) FROM Person
+    -> UNION SELECT 'Organization', COUNT(*) FROM Organization
+    -> UNION SELECT 'Employment', COUNT(*) FROM Employment
+    -> UNION SELECT 'JobPosition', COUNT(*) FROM JobPosition;
++--------------+----------+
+| TableName    | COUNT(*) |
++--------------+----------+
+| Person       |       10 |
+| Organization |       10 |
+| Employment   |       10 |
+| JobPosition  |       10 |
++--------------+----------+
+4 rows in set (0.14 sec)
+
+mysql> SELECT * FROM InternalOrganizations;
++-------+-------------------+----------------------------+---------------+--------------+----------+
+| OrgID | Name              | Address                    | Phone         | BudgetNumber | Type     |
++-------+-------------------+----------------------------+---------------+--------------+----------+
+|     1 | TT Holdings HQ    | 1 Kingsway, Maseru Central | 266-2231-2345 | BGT1001      | Internal |
+|     2 | Finance Division  | 1 Kingsway, Maseru Central | 266-2231-2346 | BGT1002      | Internal |
+|     3 | HR Department     | 1 Kingsway, Maseru Central | 266-2231-2347 | BGT1003      | Internal |
+|     6 | Quality Assurance | 1 Kingsway, Maseru Central | 266-2231-2348 | BGT1004      | Internal |
+|     7 | Marketing Team    | 1 Kingsway, Maseru Central | 266-2231-2349 | BGT1005      | Internal |
+|     9 | Customer Support  | 1 Kingsway, Maseru Central | 266-2231-2350 | BGT1006      | Internal |
++-------+-------------------+----------------------------+---------------+--------------+----------+
+6 rows in set (0.04 sec)
+
+mysql> SELECT * FROM CurrentEmployments LIMIT 3;
++--------------+----------+-------+----------------+-----------------+---------+
+| EmploymentID | PersonID | OrgID | EmploymentDate | TerminationDate | Bonus   |
++--------------+----------+-------+----------------+-----------------+---------+
+|            1 |        1 |     1 | 2010-06-15     | NULL            | 5000.00 |
+|            2 |        2 |     2 | 2015-03-22     | NULL            | 3000.00 |
+|            4 |        4 |     4 | 2018-07-05     | NULL            | 4000.00 |
++--------------+----------+-------+----------------+-----------------+---------+
+3 rows in set (0.00 sec)
+
+mysql> SELECT p.Name, CalculateTotalCompensation(p.PersonID)
+    -> FROM Person p WHERE p.PersonID IN (1,2,3);
++-----------------+----------------------------------------+
+| Name            | CalculateTotalCompensation(p.PersonID) |
++-----------------+----------------------------------------+
+| Thabo Mokoena   |                              155000.00 |
+| Matseliso Phiri |                              123000.00 |
+| Tumisang Letsie |                                   0.00 |
++-----------------+----------------------------------------+
+3 rows in set (0.10 sec)
+
+mysql> SELECT p.Name, IsPermanentEmployee(p.PersonID)
+    -> FROM Person p LIMIT 5;
++--------------------+---------------------------------+
+| Name               | IsPermanentEmployee(p.PersonID) |
++--------------------+---------------------------------+
+| Thabo Mokoena      |                               1 |
+| Matseliso Phiri    |                               1 |
+| Tumisang Letsie    |                               0 |
+| Lineo Mokhele      |                               0 |
+| Motlatsi Nt?onyana |                               0 |
++--------------------+---------------------------------+
+5 rows in set (0.08 sec)
+
+mysql> CALL GenerateOrganizationEmploymentReport(1);
++----------+-------------------+----------------+-------------------+--------------------+-----------+
+| PersonID | EmployeeName      | EmploymentDate | TerminationStatus | CurrentPosition    | Salary    |
++----------+-------------------+----------------+-------------------+--------------------+-----------+
+|        6 | Malebohang Mohapi | 2019-04-12     | Current           | Marketing Director | 110000.00 |
+|        1 | Thabo Mokoena     | 2010-06-15     | Current           | CEO                | 150000.00 |
++----------+-------------------+----------------+-------------------+--------------------+-----------+
+2 rows in set (0.05 sec)
+
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> CALL PromoteEmployee(99, 99, NULL);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`ttholding`.`personposition`, CONSTRAINT `personposition_ibfk_1` FOREIGN KEY (`PersonID`) REFERENCES `person` (`PersonID`))
+mysql> UPDATE JobPosition SET Salary = 100000 WHERE PositionID = 1;
+ERROR 1644 (45000): Salary cannot be reduced
+mysql> UPDATE JobPosition SET Salary = 200000 WHERE PositionID = 1;
+Query OK, 1 row affected (0.06 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> INSERT INTO Organization (Name, Type) VALUES ('TEST ORG', 'External');
+Query OK, 1 row affected (0.09 sec)
+
+mysql> DELETE FROM Organization WHERE Name = 'TEST ORG';
+Query OK, 1 row affected (0.13 sec)
+
+mysql> SELECT * FROM OrganizationArchive WHERE Name = 'TEST ORG';
++-----------+-------+----------+---------+-------+--------------+----------+-------------+----------------------+
+| ArchiveID | OrgID | Name     | Address | Phone | BudgetNumber | Type     | DeletedDate | OriginalCreationDate |
++-----------+-------+----------+---------+-------+--------------+----------+-------------+----------------------+
+|         1 |    11 | TEST ORG | NULL    | NULL  | NULL         | External | 2025-03-26  | 2025-03-26 20:54:23  |
++-----------+-------+----------+---------+-------+--------------+----------+-------------+----------------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT * FROM PersonBasicInfo;
++----------+---------------------+---------------+
+| PersonID | Name                | Phone         |
++----------+---------------------+---------------+
+|        1 | Thabo Mokoena       | 266-5874-1234 |
+|        2 | Matseliso Phiri     | 266-5874-5678 |
+|        3 | Tumisang Letsie     | 266-5874-9012 |
+|        4 | Lineo Mokhele       | 266-5874-3456 |
+|        5 | Motlatsi Nt?onyana  | 266-5874-7890 |
+|        6 | Malebohang Mohapi   | 266-5874-2345 |
+|        7 | Lehlohonolo Mphanya | 266-5874-6789 |
+|        8 | Mamello Thabane     | 266-5874-0123 |
+|        9 | T?epo Majara        | 266-5874-4567 |
+|       10 | Palesa Sekhonyana   | 266-5874-8901 |
++----------+---------------------+---------------+
+10 rows in set (0.01 sec)
+
+mysql> SELECT * FROM JobPositionResponsibility;
++------------+-----------------------+--------------------------+
+| PositionID | Title                 | ResponsibleOrganization  |
++------------+-----------------------+--------------------------+
+|          1 | CEO                   | TT Holdings HQ           |
+|          2 | CFO                   | Finance Division         |
+|          3 | HR Manager            | HR Department            |
+|          4 | Software Developer    | Mafeteng Tech Solutions  |
+|          5 | Account Manager       | Leribe Business Partners |
+|          6 | Marketing Director    | TT Holdings HQ           |
+|          7 | Data Analyst          | Finance Division         |
+|          8 | Customer Support Lead | HR Department            |
+|          9 | Logistics Coordinator | Mafeteng Tech Solutions  |
+|         10 | QA Specialist         | Leribe Business Partners |
++------------+-----------------------+--------------------------+
+10 rows in set (0.01 sec)
+
+mysql> SHOW GRANTS FOR 'mamello_hr'@'localhost';
++--------------------------------------------------------------------------------------+
+| Grants for mamello_hr@localhost                                                      |
++--------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `mamello_hr`@`localhost`                                       |
+| GRANT SELECT, INSERT, UPDATE ON `ttholding`.`employment` TO `mamello_hr`@`localhost` |
+| GRANT SELECT ON `ttholding`.`organization` TO `mamello_hr`@`localhost`               |
+| GRANT SELECT, INSERT, UPDATE ON `ttholding`.`person` TO `mamello_hr`@`localhost`     |
++--------------------------------------------------------------------------------------+
+4 rows in set (0.04 sec)
+
+mysql> SHOW GRANTS FOR 'thabo_finance'@'localhost';
++--------------------------------------------------------------------------------------------------------------+
+| Grants for thabo_finance@localhost                                                                           |
++--------------------------------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `thabo_finance`@`localhost`                                                            |
+| GRANT SELECT ON `ttholding`.`employment` TO `thabo_finance`@`localhost`                                      |
+| GRANT SELECT, UPDATE ON `ttholding`.`jobposition` TO `thabo_finance`@`localhost`                             |
+| GRANT SELECT ON `ttholding`.`person` TO `thabo_finance`@`localhost`                                          |
+| GRANT EXECUTE ON PROCEDURE `ttholding`.`generateorganizationemploymentreport` TO `thabo_finance`@`localhost` |
++--------------------------------------------------------------------------------------------------------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT p.Name, BirthDate, TIMESTAMPDIFF(YEAR, BirthDate, CURDATE()) AS Age
+    -> FROM Person p LIMIT 5;
++--------------------+------------+------+
+| Name               | BirthDate  | Age  |
++--------------------+------------+------+
+| Thabo Mokoena      | 1980-05-15 |   44 |
+| Matseliso Phiri    | 1985-08-22 |   39 |
+| Tumisang Letsie    | 1975-11-30 |   49 |
+| Lineo Mokhele      | 1990-03-10 |   35 |
+| Motlatsi Nt?onyana | 1982-07-18 |   42 |
++--------------------+------------+------+
+5 rows in set (0.03 sec)
+
+mysql> INSERT INTO Person (Name, BirthDate) VALUES ('Baby', CURDATE());
+ERROR 1644 (45000): Person must be at least 18 years old
+mysql> INSERT INTO Person (Name) VALUES ('Nate');
+Query OK, 1 row affected (0.11 sec)
+
+mysql> INSERT INTO Person (Name) VALUES ('Nameless');
+Query OK, 1 row affected (0.09 sec)
+
+mysql> CALL PromoteEmployee(2, 6, NULL);
++--------------------------------+
+| Result                         |
++--------------------------------+
+| Employee promoted successfully |
++--------------------------------+
+1 row in set (0.19 sec)
+
+Query OK, 0 rows affected (0.21 sec)
+
+mysql> SELECT * FROM PersonPosition WHERE PersonID = 2;
++----------+------------+------------+-----------------+
+| PersonID | PositionID | StartDate  | TerminationDate |
++----------+------------+------------+-----------------+
+|        2 |          2 | 2015-03-22 | 2025-03-26      |
+|        2 |          6 | 2025-03-26 | NULL            |
++----------+------------+------------+-----------------+
+2 rows in set (0.00 sec)
+
+mysql> START TRANSACTION;
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> UPDATE JobPosition SET Salary = 95000 WHERE PositionID = 1;
+ERROR 1644 (45000): Salary cannot be reduced
+mysql> UPDATE JobPosition SET Salary = 100000 WHERE PositionID = 1;
+ERROR 1644 (45000): Salary cannot be reduced
+mysql> SELECT
+    ->     TABLE_NAME AS ObjectName,
+    ->     'Table' AS ObjectType
+    -> FROM INFORMATION_SCHEMA.TABLES
+    -> WHERE TABLE_SCHEMA = 'TTHolding'
+    ->
+    -> UNION ALL
+    ->
+    -> SELECT
+    ->     TABLE_NAME AS ObjectName,
+    ->     'View' AS ObjectType
+    -> FROM INFORMATION_SCHEMA.VIEWS
+    -> WHERE TABLE_SCHEMA = 'TTHolding'
+    ->
+    -> UNION ALL
+    ->
+    -> SELECT
+    ->     ROUTINE_NAME AS ObjectName,
+    ->     ROUTINE_TYPE AS ObjectType
+    -> FROM INFORMATION_SCHEMA.ROUTINES
+    -> WHERE ROUTINE_SCHEMA = 'TTHolding';
++--------------------------------------+------------+
+| ObjectName                           | ObjectType |
++--------------------------------------+------------+
+| currentemployments                   | Table      |
+| currentpositions                     | Table      |
+| employment                           | Table      |
+| employmentduration                   | Table      |
+| highsalaryjobpositions               | Table      |
+| internalorganizations                | Table      |
+| jobposition                          | Table      |
+| jobpositionhistory                   | Table      |
+| jobpositionresponsibility            | Table      |
+| organization                         | Table      |
+| organizationarchive                  | Table      |
+| organizationcontactinfo              | Table      |
+| parttimeemployee                     | Table      |
+| parttimeemployeeswithmanyhours       | Table      |
+| parttimeemployeeworkload             | Table      |
+| permanentemployee                    | Table      |
+| permanentemployeebenefits            | Table      |
+| permanentemployeeswithhighbonus      | Table      |
+| person                               | Table      |
+| personage                            | Table      |
+| personbasicinfo                      | Table      |
+| personposition                       | Table      |
+| currentemployments                   | View       |
+| currentpositions                     | View       |
+| employmentduration                   | View       |
+| highsalaryjobpositions               | View       |
+| internalorganizations                | View       |
+| jobpositionhistory                   | View       |
+| jobpositionresponsibility            | View       |
+| organizationcontactinfo              | View       |
+| parttimeemployeeswithmanyhours       | View       |
+| parttimeemployeeworkload             | View       |
+| permanentemployeebenefits            | View       |
+| permanentemployeeswithhighbonus      | View       |
+| personage                            | View       |
+| personbasicinfo                      | View       |
+| CalculateTotalCompensation           | FUNCTION   |
+| IsPermanentEmployee                  | FUNCTION   |
+| GenerateOrganizationEmploymentReport | PROCEDURE  |
+| PromoteEmployee                      | PROCEDURE  |
++--------------------------------------+------------+
+40 rows in set (0.18 sec)
+
+mysql> SELECT
+    ->     p.Name AS Employee,
+    ->     jp.Title AS Position,
+    ->     o.Name AS Organization
+    -> FROM Person p
+    -> JOIN PersonPosition pp ON p.PersonID = pp.PersonID
+    -> JOIN JobPosition jp ON pp.PositionID = jp.PositionID
+    -> JOIN Organization o ON jp.ResponsibleOrgID = o.OrgID
+    -> WHERE pp.TerminationDate IS NULL;
++---------------------+-----------------------+--------------------------+
+| Employee            | Position              | Organization             |
++---------------------+-----------------------+--------------------------+
+| Thabo Mokoena       | CEO                   | TT Holdings HQ           |
+| Matseliso Phiri     | Marketing Director    | TT Holdings HQ           |
+| Lineo Mokhele       | Software Developer    | Mafeteng Tech Solutions  |
+| Motlatsi Nt?onyana  | Account Manager       | Leribe Business Partners |
+| Malebohang Mohapi   | Marketing Director    | TT Holdings HQ           |
+| Lehlohonolo Mphanya | Data Analyst          | Finance Division         |
+| Mamello Thabane     | Customer Support Lead | HR Department            |
+| Palesa Sekhonyana   | QA Specialist         | Leribe Business Partners |
++---------------------+-----------------------+--------------------------+
+8 rows in set (0.00 sec)
+
+mysql> SELECT
+    ->     GRANTEE AS User,
+    ->     PRIVILEGE_TYPE AS Permission,
+    ->     TABLE_NAME AS Object
+    -> FROM INFORMATION_SCHEMA.TABLE_PRIVILEGES
+    -> WHERE TABLE_SCHEMA = 'TTHolding'
+    -> ORDER BY GRANTEE;
++-----------------------------+------------+--------------+
+| User                        | Permission | Object       |
++-----------------------------+------------+--------------+
+| 'mamello_hr'@'localhost'    | SELECT     | organization |
+| 'mamello_hr'@'localhost'    | SELECT     | person       |
+| 'mamello_hr'@'localhost'    | INSERT     | person       |
+| 'mamello_hr'@'localhost'    | UPDATE     | person       |
+| 'mamello_hr'@'localhost'    | SELECT     | employment   |
+| 'mamello_hr'@'localhost'    | INSERT     | employment   |
+| 'mamello_hr'@'localhost'    | UPDATE     | employment   |
+| 'thabo_finance'@'localhost' | SELECT     | person       |
+| 'thabo_finance'@'localhost' | SELECT     | jobposition  |
+| 'thabo_finance'@'localhost' | UPDATE     | jobposition  |
+| 'thabo_finance'@'localhost' | SELECT     | employment   |
++-----------------------------+------------+--------------+
+11 rows in set (0.04 sec)
+
+mysql> SHOW CREATE TABLE Person;
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table  | Create Table                                                                                                                                                                                                                                                                                                                  |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Person | CREATE TABLE `person` (
+  `PersonID` int NOT NULL AUTO_INCREMENT,
+  `Name` varchar(100) NOT NULL,
+  `Address` varchar(200) DEFAULT NULL,
+  `Phone` varchar(20) DEFAULT NULL,
+  `BirthDate` date DEFAULT NULL,
+  PRIMARY KEY (`PersonID`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.02 sec)
+
+mysql> SELECT * FROM Organization LIMIT 5;
++-------+--------------------------+----------------------------+---------------+--------------+----------+
+| OrgID | Name                     | Address                    | Phone         | BudgetNumber | Type     |
++-------+--------------------------+----------------------------+---------------+--------------+----------+
+|     1 | TT Holdings HQ           | 1 Kingsway, Maseru Central | 266-2231-2345 | BGT1001      | Internal |
+|     2 | Finance Division         | 1 Kingsway, Maseru Central | 266-2231-2346 | BGT1002      | Internal |
+|     3 | HR Department            | 1 Kingsway, Maseru Central | 266-2231-2347 | BGT1003      | Internal |
+|     4 | Mafeteng Tech Solutions  | 25 Main Rd, Mafeteng       | 266-2270-1234 | BGT2001      | External |
+|     5 | Leribe Business Partners | 12 Hlotse Rd, Leribe       | 266-2240-5678 | BGT3001      | External |
++-------+--------------------------+----------------------------+---------------+--------------+----------+
+5 rows in set (0.00 sec)
+
+mysql> select * from person;
++----------+---------------------+--------------------------+---------------+------------+
+| PersonID | Name                | Address                  | Phone         | BirthDate  |
++----------+---------------------+--------------------------+---------------+------------+
+|        1 | Thabo Mokoena       | 123 Hillsview, Maseru    | 266-5874-1234 | 1980-05-15 |
+|        2 | Matseliso Phiri     | 456 Thetsane, Maseru     | 266-5874-5678 | 1985-08-22 |
+|        3 | Tumisang Letsie     | 789 Ha Abia, Maseru      | 266-5874-9012 | 1975-11-30 |
+|        4 | Lineo Mokhele       | 321 Lower Thamae, Maseru | 266-5874-3456 | 1990-03-10 |
+|        5 | Motlatsi Nt?onyana  | 654 Ha Leqele, Maseru    | 266-5874-7890 | 1982-07-18 |
+|        6 | Malebohang Mohapi   | 987 Pitseng, Leribe      | 266-5874-2345 | 1988-09-25 |
+|        7 | Lehlohonolo Mphanya | 135 Ha Matala, Maseru    | 266-5874-6789 | 1978-12-05 |
+|        8 | Mamello Thabane     | 246 Ha Thetsane, Maseru  | 266-5874-0123 | 1992-04-12 |
+|        9 | T?epo Majara        | 864 Ha Foso, Mafeteng    | 266-5874-4567 | 1983-06-20 |
+|       10 | Palesa Sekhonyana   | 975 Ha Makhoathi, Maseru | 266-5874-8901 | 1987-01-28 |
+|       11 | Nate                | NULL                     | NULL          | NULL       |
+|       12 | Nameless            | NULL                     | NULL          | NULL       |
++----------+---------------------+--------------------------+---------------+------------+
+12 rows in set (1.62 sec)
+
+mysql>
+
+
+mysql>
